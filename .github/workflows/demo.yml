@@ -11,11 +11,42 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Spin up a real PostgreSQL database for the test job
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{ vars.DB_NAME }}
+          POSTGRES_USER: ${{ vars.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    # DB connection env variables available to all steps in this job
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: ${{ vars.DB_NAME }}
+      DB_USER: ${{ vars.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
     steps:
       - name: Get code
         uses: actions/checkout@v3
       - name: Install dependencies
         run: npm ci
+      - name: Print DB connection info
+        run: |
+          echo "==============================="
+          echo "DB_HOST    = $DB_HOST"
+          echo "DB_PORT    = $DB_PORT"
+          echo "DB_NAME    = $DB_NAME"
+          echo "DB_USER    = $DB_USER"
+          echo "DB_PASSWORD is set: ${{ secrets.DB_PASSWORD != '' }}"
+          echo "==============================="
       - name: Lint code
         run: npm run lint
       - name: Test code
