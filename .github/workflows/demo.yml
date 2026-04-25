@@ -56,9 +56,11 @@ jobs:
         run: echo "${{ needs.build.outputs.script-file }}"
       - name: Print env variables
         run: |
-          echo "Node env: $NODE_ENV"
-          echo "App version: $APP_VERSION"
-          echo "Deploy target: $DEPLOY_TARGET"
+          echo "==============================="
+          echo "APP_VERSION = $APP_VERSION"
+          echo "NODE_ENV = $NODE_ENV"
+          echo "DEPLOY_TARGET = $DEPLOY_TARGET"
+          echo "==============================="
       - name: Deploy
         env:
           # Step-level env variable - available to THIS step only
